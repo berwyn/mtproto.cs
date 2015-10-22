@@ -26,12 +26,10 @@ namespace MTProto_Tests.TL
         [TestMethod]
         public void TLBoolSerialization()
         {
-            var boolTrue = new TLBool();
-            boolTrue.Value = true;
-            CollectionAssert.AreEquivalent(bufferTrue, boolTrue.ToBytes());
+            var boolTrue = new TLBool(true);
+            var boolFalse = new TLBool(false);
 
-            var boolFalse = new TLBool();
-            boolFalse.Value = false;
+            CollectionAssert.AreEquivalent(bufferTrue, boolTrue.ToBytes());
             CollectionAssert.AreEquivalent(bufferFalse, boolFalse.ToBytes());
 
             using (var streamTrue = new MemoryStream())
@@ -57,28 +55,24 @@ namespace MTProto_Tests.TL
         public void TLBoolHydration()
         {
             int pos = 0;
-            var boolTrue = new TLBool();
-            boolTrue.FromBytes(bufferTrue, ref pos);
+            var boolTrue = new TLBool(bufferTrue, ref pos);
             Assert.AreEqual(true, boolTrue.Value);
 
             pos = 0;
-            var boolFalse = new TLBool();
-            boolFalse.FromBytes(bufferFalse, ref pos);
+            var boolFalse = new TLBool(bufferFalse, ref pos);
             Assert.AreEqual(false, boolFalse.Value);
 
             pos = 0;
             using (var streamTrue = new MemoryStream(bufferTrue))
             {
-                var streamBoolTrue = new TLBool();
-                streamBoolTrue.FromStream(streamTrue, ref pos);
+                var streamBoolTrue = new TLBool(streamTrue, ref pos);
                 Assert.AreEqual(true, streamBoolTrue.Value);
             }
 
             pos = 0;
             using (var streamFalse = new MemoryStream(bufferFalse))
             {
-                var streamBoolFalse = new TLBool();
-                streamBoolFalse.FromStream(streamFalse, ref pos);
+                var streamBoolFalse = new TLBool(streamFalse, ref pos);
                 Assert.AreEqual(false, streamBoolFalse.Value);
             }
         }

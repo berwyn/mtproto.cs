@@ -20,6 +20,23 @@ namespace MTProto.TL
             set { _value = value; NotifyPropertyChanged(nameof(Value)); }
         }
 
+        public TLBool() { }
+
+        public TLBool(bool value)
+        {
+            _value = value;
+        }
+
+        public TLBool(byte[] buffer, ref int position)
+        {
+            FromBytes(buffer, ref position);
+        }
+
+        public TLBool(Stream input, ref int position)
+        {
+            FromStream(input, ref position);
+        }
+
         public override TLObject FromBytes(byte[] bytes, ref int position)
         {
             var buffer = new byte[4];

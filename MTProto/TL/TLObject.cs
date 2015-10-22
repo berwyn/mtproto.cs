@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MTProto.TL
 {
-    public abstract class TLObject : INotifyPropertyChanged
+    public abstract class TLObject: INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

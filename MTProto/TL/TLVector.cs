@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MTProto.TL
 {
-    class TLVector<T> : TLObject, ICollection<T>
+    public class TLVector<T> : TLObject, ICollection<T> where T : TLObject
     {
         private const int Signatiure = 0x1cb5c415;
 
@@ -22,6 +22,16 @@ namespace MTProto.TL
                 _collection = value;
                 NotifyPropertyChanged(nameof(Value));
             }
+        }
+
+        public TLVector()
+        {
+            _collection = new List<T>();
+        }
+
+        public TLVector(int capacity)
+        {
+            _collection = new List<T>(capacity);
         }
 
         public T this[int index] => _collection[index];
@@ -48,6 +58,7 @@ namespace MTProto.TL
 
         public override TLObject FromBytes(byte[] bytes, ref int position)
         {
+            bytes.ThrowIfIncorrectSignature(ref position, Signatiure);
             throw new NotImplementedException();
         }
 
