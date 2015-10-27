@@ -61,10 +61,7 @@ namespace MTProto.TL
         public override void ToStream(Stream input)
         {
             var buffer = ToBytes();
-            for(var i = 0; i < 4; i++)
-            {
-                input.WriteByte(buffer[i]);
-            }
+            input.Write(buffer, 0, buffer.Length);
         }
 
         private void Parse(byte[] buffer, ref int position)

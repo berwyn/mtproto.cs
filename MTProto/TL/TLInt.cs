@@ -63,10 +63,7 @@ namespace MTProto.TL
         public override void ToStream(Stream input)
         {
             var buffer = BitConverter.GetBytes(Value);
-            for(int i = 0, len = buffer.Length; i < len; i++)
-            {
-                input.WriteByte(buffer[i]);
-            }
+            input.Write(buffer, 0, buffer.Length);
         }
 
         private void parse(byte[] buffer, ref int position)
