@@ -14,7 +14,7 @@ namespace MTProto_Tests.TL
     {
 
         [TestMethod]
-        public void TestSerialization()
+        public void TLIntSerialization()
         {
             var test1 = new TLInt(4);
             var buffer1 = test1.ToBytes();
@@ -41,7 +41,7 @@ namespace MTProto_Tests.TL
         }
 
         [TestMethod]
-        public void TestHydration()
+        public void TLIntHydration()
         {
             var buffer4 = BitConverter.GetBytes(4);
             var buffer544 = BitConverter.GetBytes(544);

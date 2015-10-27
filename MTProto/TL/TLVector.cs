@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MTProto.TL
 {
-    public class TLVector<T> : TLObject, ICollection<T> where T : TLObject
+    public class TLVector<T> : TLObject, ICollection<T> where T : TLObject, new()
     {
         private const int Signatiure = 0x1cb5c415;
 
@@ -32,6 +32,16 @@ namespace MTProto.TL
         public TLVector(int capacity)
         {
             _collection = new List<T>(capacity);
+        }
+
+        public TLVector(byte[] bytes, ref int position) : this()
+        {
+            this.FromBytes(bytes, ref position);
+        }
+
+        public TLVector(Stream input, ref int position) : this()
+        {
+            this.FromStream(input, ref position);
         }
 
         public T this[int index] => _collection[index];
@@ -59,12 +69,27 @@ namespace MTProto.TL
         public override TLObject FromBytes(byte[] bytes, ref int position)
         {
             bytes.ThrowIfIncorrectSignature(ref position, Signatiure);
-            throw new NotImplementedException();
+            int length = new TLInt(bytes, ref position).Value;
+            for(var i = 0; i < length; i++)
+            {
+                T item = new T();
+                item.FromBytes(bytes, ref position);
+                Add(item);
+            }
+            return this;
         }
 
         public override TLObject FromStream(Stream input, ref int position)
         {
-            throw new NotImplementedException();
+            input.ThrowIfIncorrectSignature(ref position, Signatiure);
+            int length = new TLInt(input, ref position).Value;
+            for(var i = 0; i < length; i++)
+            {
+                T item = new T();
+                item.FromStream(input, ref position);
+                Add(item);
+            }
+            return this;
         }
 
         public IEnumerator<T> GetEnumerator() => _collection.GetEnumerator();
@@ -78,12 +103,20 @@ namespace MTProto.TL
 
         public override byte[] ToBytes()
         {
-            throw new NotImplementedException();
+            List<byte> bytes = new List<byte>();
+            bytes.AddRange(BitConverter.GetBytes(Signatiure));
+            bytes.AddRange(new TLInt(Count).ToBytes());
+            for(int i = 0, len = Count; i < len; i++)
+            {
+                bytes.AddRange(this[i].ToBytes());
+            }
+            return bytes.ToArray();
         }
 
         public override void ToStream(Stream input)
         {
-            throw new NotImplementedException();
+            var bytes = ToBytes();
+            input.Write(bytes, 0, bytes.Length);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => _collection.GetEnumerator();

@@ -11,16 +11,20 @@ namespace MTProto.TL
     {
         public static void ThrowIfIncorrectSignature(this byte[] bytes, ref int position, int signature)
         {
-            var buffer = new byte[4];
-            Array.Copy(bytes, position, buffer, 0, 4);
-
-            if(!BitConverter.ToInt32(buffer, 0).Equals(signature))
+            int localSig = new TLInt(bytes, ref position).Value;
+            if (localSig != signature)
             {
-                // TODO: Messaging?
                 throw new InvalidDataException();
             }
+        }
 
-            position += 4;
+        public static void ThrowIfIncorrectSignature(this Stream input, ref int position, int signature)
+        {
+            int localSig = new TLInt(input, ref position).Value;
+            if(localSig != signature)
+            {
+                throw new InvalidDataException();
+            }
         }
     }
 }
