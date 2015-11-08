@@ -112,6 +112,7 @@
     <Compile Include="TL\TLExtensions.cs" />
     <Compile Include="TL\TLInt.cs" />
     <Compile Include="TL\TLObject.cs" />
+    <Compile Include="TL\TLString.cs" />
     <Compile Include="TL\TLVector.cs" />
     <Content Include="Properties\MTProto.rd.xml" />
   </ItemGroup>
