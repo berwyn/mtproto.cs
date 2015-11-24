@@ -3,12 +3,12 @@ using System.IO;
 
 namespace MTProto.TL
 {
-    public class TLInt : TLObject
+    public class TLLong : TLObject
     {
 
-        private int _value;
+        private long _value;
 
-        public int Value
+        public long Value
         {
             get { return _value; }
             set
@@ -18,19 +18,19 @@ namespace MTProto.TL
             }
         }
 
-        public TLInt() { }
+        public TLLong() { }
 
-        public TLInt(int value)
+        public TLLong(long value)
         {
             _value = value;
         }
 
-        public TLInt(byte[] buffer, ref int position)
+        public TLLong(byte[] buffer, ref int position)
         {
             FromBytes(buffer, ref position);
         }
 
-        public TLInt(Stream input, ref int position)
+        public TLLong(Stream input, ref int position)
         {
             FromStream(input, ref position);
         }
@@ -45,8 +45,8 @@ namespace MTProto.TL
 
         public override TLObject FromStream(Stream input, ref int position)
         {
-            var buffer = new byte[4];
-            input.Read(buffer, 0, 4);
+            var buffer = new byte[8];
+            input.Read(buffer, 0, 8);
             parse(buffer, ref position);
             return this;
         }
@@ -65,7 +65,8 @@ namespace MTProto.TL
         private void parse(byte[] buffer, ref int position)
         {
             Value = BitConverter.ToInt32(buffer, 0);
-            position += 4;
+            position += 8;
         }
+
     }
 }

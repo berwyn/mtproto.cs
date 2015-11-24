@@ -1,11 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using MTProto.TL;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MTProto_Tests.TL
 {
