@@ -53,9 +53,9 @@ namespace MTProto_Tests.TL
             pos = 0;
             var peerSelf = new TLInputPeer(inputSelfBuffer, ref pos);
             Assert.AreEqual(TLInputPeer.Signature.InputPeerSelf, peerSelf.SIGNATURE);
-            Assert.IsNull(peerEmpty.UserID);
-            Assert.IsNull(peerEmpty.AccessHash);
-            Assert.IsNull(peerEmpty.ChatID);
+            Assert.IsNull(peerSelf.UserID);
+            Assert.IsNull(peerSelf.AccessHash);
+            Assert.IsNull(peerSelf.ChatID);
 
             pos = 0;
             var peerContact = new TLInputPeer(inputContactbuffer, ref pos);
@@ -96,9 +96,9 @@ namespace MTProto_Tests.TL
 
                 peerSelf = new TLInputPeer(stream, ref pos);
                 Assert.AreEqual(TLInputPeer.Signature.InputPeerSelf, peerSelf.SIGNATURE);
-                Assert.IsNull(peerEmpty.UserID);
-                Assert.IsNull(peerEmpty.AccessHash);
-                Assert.IsNull(peerEmpty.ChatID);
+                Assert.IsNull(peerSelf.UserID);
+                Assert.IsNull(peerSelf.AccessHash);
+                Assert.IsNull(peerSelf.ChatID);
 
                 peerContact = new TLInputPeer(stream, ref pos);
                 Assert.AreEqual(TLInputPeer.Signature.InputPeerContact, peerContact.SIGNATURE);

@@ -99,6 +99,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TL\TLBoolTests.cs" />
     <Compile Include="TL\TLInputPeerTests.cs" />
+    <Compile Include="TL\TLInputUserTests.cs" />
     <Compile Include="TL\TLIntTests.cs" />
     <Compile Include="TL\TLLongTests.cs" />
     <Compile Include="TL\TLNullTests.cs" />

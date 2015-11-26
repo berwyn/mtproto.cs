@@ -111,6 +111,7 @@
     <Compile Include="TL\TLBool.cs" />
     <Compile Include="TL\TLExtensions.cs" />
     <Compile Include="TL\TLInputPeer.cs" />
+    <Compile Include="TL\TLInputUser.cs" />
     <Compile Include="TL\TLInt.cs" />
     <Compile Include="TL\TLLong.cs" />
     <Compile Include="TL\TLNull.cs" />
