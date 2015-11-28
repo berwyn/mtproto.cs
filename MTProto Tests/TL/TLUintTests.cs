@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using MTProto.TL;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace MTProto_Tests.TL
 {
@@ -11,27 +13,25 @@ namespace MTProto_Tests.TL
         [TestMethod]
         public void TLUintSerialization()
         {
-            var test1 = new TLUint(25565);
-            var buffer1 = test1.ToBytes();
-            var test2 = new TLUint(99999);
-            var buffer2 = test2.ToBytes();
-
-            Assert.AreEqual(4, BitConverter.ToInt32(buffer1, 0));
-            Assert.AreEqual(544, BitConverter.ToInt32(buffer2, 0));
+            CollectionAssert.AreEqual(BitConverter.GetBytes(25565U), new TLUint(25565U).ToBytes());
+            CollectionAssert.AreEqual(BitConverter.GetBytes(99999U), new TLUint(99999U).ToBytes());
 
             using (var stream = new MemoryStream())
             {
-                test1.ToStream(stream);
-                test2.ToStream(stream);
+                new TLUint(25565U).ToStream(stream);
+                new TLUint(99999U).ToStream(stream);
 
-                var streamBuffer1 = new byte[4];
-                var streamBuffer2 = new byte[4];
+                var buffer = new byte[8];
                 stream.Position = 0;
-                stream.Read(streamBuffer1, 0, 4);
-                stream.Read(streamBuffer2, 0, 4);
+                stream.Read(buffer, 0, 4);
+                stream.Read(buffer, 4, 4);
 
-                Assert.AreEqual(4, BitConverter.ToInt32(streamBuffer1, 0));
-                Assert.AreEqual(544, BitConverter.ToInt32(streamBuffer2, 0));
+                var expected = new List<byte[]>
+                {
+                    BitConverter.GetBytes(25565U),
+                    BitConverter.GetBytes(99999U)
+                }.SelectMany(x => x).ToArray();
+                CollectionAssert.AreEquivalent(expected, buffer);
             }
         }
 
@@ -46,8 +46,8 @@ namespace MTProto_Tests.TL
             pos = 0;
             var int544 = new TLUint(buffer544, ref pos);
 
-            Assert.AreEqual(4, int4.Value);
-            Assert.AreEqual(544, int544.Value);
+            Assert.AreEqual(4U, int4.Value);
+            Assert.AreEqual(544U, int544.Value);
 
             using (var stream = new MemoryStream())
             {
@@ -59,8 +59,8 @@ namespace MTProto_Tests.TL
                 var streamInt4 = new TLUint(stream, ref pos);
                 var streamInt544 = new TLUint(stream, ref pos);
 
-                Assert.AreEqual(4, streamInt4.Value);
-                Assert.AreEqual(544, streamInt544.Value);
+                Assert.AreEqual(4U, streamInt4.Value);
+                Assert.AreEqual(544U, streamInt544.Value);
             }
         }
     }

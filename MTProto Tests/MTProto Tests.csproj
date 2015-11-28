@@ -106,6 +106,7 @@
     <Compile Include="TL\TLNullTests.cs" />
     <Compile Include="TL\TLStringTests.cs" />
     <Compile Include="TL\TLTrueTests.cs" />
+    <Compile Include="TL\TLUintTests.cs" />
     <Compile Include="TL\TLVectorTests.cs" />
     <Compile Include="UnitTestApp.xaml.cs">
       <DependentUpon>UnitTestApp.xaml</DependentUpon>

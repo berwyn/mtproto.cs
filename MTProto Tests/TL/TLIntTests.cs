@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using MTProto.TL;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace MTProto_Tests.TL
 {
@@ -12,28 +14,25 @@ namespace MTProto_Tests.TL
         [TestMethod]
         public void TLIntSerialization()
         {
-            var test1 = new TLInt(4);
-            var buffer1 = test1.ToBytes();
-            var test2 = new TLInt(544);
-            var buffer2 = test2.ToBytes();
+            CollectionAssert.AreEqual(BitConverter.GetBytes(4), new TLInt(4).ToBytes());
+            CollectionAssert.AreEqual(BitConverter.GetBytes(544), new TLInt(544).ToBytes());
 
-            Assert.AreEqual(4, BitConverter.ToInt32(buffer1, 0));
-            Assert.AreEqual(544, BitConverter.ToInt32(buffer2, 0));
-
-            using(var stream = new MemoryStream())
+            using (var stream = new MemoryStream())
             {
-                test1.ToStream(stream);
-                test2.ToStream(stream);
+                var expected = new List<byte[]>
+                {
+                    BitConverter.GetBytes(4),
+                    BitConverter.GetBytes(544)
+                }.SelectMany(x => x).ToArray();
 
-                var streamBuffer1 = new byte[4];
-                var streamBuffer2 = new byte[4];
+                new TLInt(4).ToStream(stream);
+                new TLInt(544).ToStream(stream);
+
+                var actual = new byte[expected.Length];
                 stream.Position = 0;
-                stream.Read(streamBuffer1, 0, 4);
-                stream.Read(streamBuffer2, 0, 4);
-
-                Assert.AreEqual(4, BitConverter.ToInt32(streamBuffer1, 0));
-                Assert.AreEqual(544, BitConverter.ToInt32(streamBuffer2, 0));
-            }            
+                stream.Read(actual, 0, actual.Length);
+                CollectionAssert.AreEquivalent(expected, actual);
+            }
         }
 
         [TestMethod]

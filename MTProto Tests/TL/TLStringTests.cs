@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using MTProto.TL;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -40,7 +41,7 @@ namespace MTProto_Tests.TL
 
             var tlLongStr = new TLString(LONG_TEXT);
             var longBuffer = Encoding.UTF8.GetBytes(LONG_TEXT);
-            padding =  4 - (longBuffer.Length % 4);
+            padding = 4 - (longBuffer.Length % 4);
             byte[] lengthBuffer = BitConverter.GetBytes(longBuffer.Length)
                 .Take(3)
                 .Reverse()
@@ -113,6 +114,107 @@ namespace MTProto_Tests.TL
                 tlStr = new TLString(stream, ref pos);
                 Assert.AreEqual(LONG_TEXT, tlStr.Value);
             }
+        }
+
+        /// <summary>
+        /// As discovered in ea3cd37, TLString had issues being red as part
+        /// of sequences of elements due to padding and how the position ref
+        /// was modified. This test ensures that any further such issues
+        /// during hydration can be caught.
+        /// </summary>
+        [TestMethod]
+        public void TLStringSequenceHydration()
+        {
+            var buffer = new List<byte[]>
+            {
+                BitConverter.GetBytes(25565),
+                encodeString("Foo"),
+                encodeString("Bar"),
+                encodeString(LONG_TEXT),
+                BitConverter.GetBytes(25565L)
+            }.SelectMany(x => x).ToArray();
+
+            var pos = 0;
+            var i = new TLInt(buffer, ref pos).Value;
+            var s1 = new TLString(buffer, ref pos).Value;
+            var s2 = new TLString(buffer, ref pos).Value;
+            var s3 = new TLString(buffer, ref pos).Value;
+            var l = new TLLong(buffer, ref pos).Value;
+
+            Assert.AreEqual(25565, i);
+            Assert.AreEqual("Foo", s1);
+            Assert.AreEqual("Bar", s2);
+            Assert.AreEqual(LONG_TEXT, s3);
+            Assert.AreEqual(25565L, l);
+
+            using (var stream = new MemoryStream())
+            {
+                stream.Write(buffer, 0, buffer.Length);
+                stream.Position = 0;
+                pos = 0;
+
+                i = new TLInt(buffer, ref pos).Value;
+                s1 = new TLString(buffer, ref pos).Value;
+                s2 = new TLString(buffer, ref pos).Value;
+                s3 = new TLString(buffer, ref pos).Value;
+                l = new TLLong(buffer, ref pos).Value;
+
+                Assert.AreEqual(25565, i);
+                Assert.AreEqual("Foo", s1);
+                Assert.AreEqual("Bar", s2);
+                Assert.AreEqual(LONG_TEXT, s3);
+                Assert.AreEqual(25565L, l);
+            }
+        }
+
+        [TestMethod]
+        public void TLStringSequenceSerialization()
+        {
+            var expected = new List<byte[]>
+            {
+                BitConverter.GetBytes(25565),
+                encodeString("Foo"),
+                encodeString("Bar"),
+                encodeString(LONG_TEXT),
+                BitConverter.GetBytes(25565L)
+            }.SelectMany(x => x).ToArray();
+
+            var actual = new List<byte[]>
+            {
+                new TLInt(25565).ToBytes(),
+                new TLString("Foo").ToBytes(),
+                new TLString("Bar").ToBytes(),
+                new TLString(LONG_TEXT).ToBytes(),
+                new TLLong(25565L).ToBytes()
+            }.SelectMany(x => x).ToArray();
+            CollectionAssert.AreEquivalent(expected, actual);
+        }
+
+        private byte[] encodeString(string value)
+        {
+            var body = Encoding.UTF8.GetBytes(value);
+            var len = body.Length;
+            var padding = 4 - (len % 4);
+
+            var output = new List<byte[]>();
+            if (len < 254)
+            {
+                output.Add(new byte[] { (byte)len });
+            }
+            else
+            {
+                var lenBytes = BitConverter.GetBytes(len).Reverse().ToArray();
+                lenBytes[0] = 254;
+                output.Add(lenBytes);
+            }
+
+            output.Add(body);
+            if (padding > 0 && padding < 4)
+            {
+                output.Add(new byte[padding]);
+            }
+
+            return output.SelectMany(x => x).ToArray();
         }
     }
 }
