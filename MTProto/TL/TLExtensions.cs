@@ -12,9 +12,9 @@ namespace MTProto.TL
         /// <param name="bytes">The buffer to operate on</param>
         /// <param name="position">The position in the buffer to start reading at</param>
         /// <param name="signature">The signature to check for</param>
-        public static void ThrowIfIncorrectSignature(this byte[] bytes, ref int position, int signature)
+        public static void ThrowIfIncorrectSignature(this byte[] bytes, ref int position, uint signature)
         {
-            int localSig = new TLInt(bytes, ref position).Value;
+            uint localSig = new TLUint(bytes, ref position).Value;
             if (localSig != signature)
             {
                 throw new InvalidDataException();
@@ -44,9 +44,9 @@ namespace MTProto.TL
         /// <param name="input">The stream to operate on</param>
         /// <param name="position">The position in the stream to start reading at</param>
         /// <param name="signature">The signature to check for</param>
-        public static void ThrowIfIncorrectSignature(this Stream input, ref int position, int signature)
+        public static void ThrowIfIncorrectSignature(this Stream input, ref int position, uint signature)
         {
-            int localSig = new TLInt(input, ref position).Value;
+            uint localSig = new TLUint(input, ref position).Value;
             if (localSig != signature)
             {
                 throw new InvalidDataException();

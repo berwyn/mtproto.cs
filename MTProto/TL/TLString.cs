@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -40,6 +41,7 @@ namespace MTProto.TL
         {
             int len = parseLen(ref position, buffer: bytes);
             var padding = 4 - (len % 4); // TLString has to be padded to a 4-byte boundary
+            if (padding == 4) padding = 0;
             var stringBytes = new byte[len];
 
             Array.Copy(bytes, position, stringBytes, 0, len);
@@ -55,11 +57,13 @@ namespace MTProto.TL
         {
             int len = parseLen(ref position, input: input);
             int padding = 4 - (len % 4); // TLString has to be padded to a 4-byte boundary
+            if (padding == 4) padding = 0;
             var stringBytes = new byte[len];
 
             input.Read(stringBytes, 0, len);
             position += len + padding;
-            stringBytes.Reverse();
+            input.Position += padding;
+            stringBytes.Reverse(); // Bytes come in as little-endian
 
             Value = Encoding.UTF8.GetString(stringBytes, 0, len);
 
@@ -68,29 +72,27 @@ namespace MTProto.TL
 
         public override byte[] ToBytes()
         {
-            byte[] output;
+            byte[] header;
             byte[] bytes = Encoding.UTF8.GetBytes(Value);
             var byteCount = bytes.Length;
             var padding = 4 - (byteCount % 4);
 
             if (byteCount < 254)
             {
-                output = new byte[1 + byteCount + padding];
-
-                output[0] = (byte)byteCount;
-                Array.Copy(bytes, 0, output, 1, byteCount);
+                header = new byte[1];
+                header[0] = (byte)byteCount;
             }
             else
             {
-                output = new byte[4 + byteCount + padding];
-                output[0] = 254; // When L >= 254, the first bit is constant
-                byte[] lenBits = BitConverter.GetBytes(byteCount).Take(3).Reverse().ToArray(); // lenBits are little-endian
-
-                Array.Copy(lenBits, 0, output, 1, lenBits.Length);
-                Array.Copy(bytes, 0, output, 4, byteCount);
+                header = BitConverter.GetBytes(byteCount).Reverse().ToArray(); // lenBits are little-endian
+                header[0] = 254; // When L >= 254, the first bit is constant
             }
 
-            return output;
+            var output = new List<byte[]> { header, bytes };
+            if (padding > 0 && padding < 4)
+                output.Add(new byte[padding]);
+
+            return output.SelectMany(x => x).ToArray();
         }
 
         public override void ToStream(Stream input)
@@ -106,7 +108,7 @@ namespace MTProto.TL
                 throw new ArgumentException("Must provide either input or buffer");
             }
 
-            int len = input == null ? buffer[0] : input.ReadByte();
+            int len = input == null ? buffer[position] : input.ReadByte();
             position += 1;
             if (len >= 254)
             {
@@ -117,9 +119,9 @@ namespace MTProto.TL
                 }
                 else
                 {
-                    for (var i = 1; i <= 3; i++)
+                    for (var i = 0; i < 3; i++)
                     {
-                        lenBytes[i] = buffer[i];
+                        lenBytes[i + 1] = buffer[i + position];
                     }
                 }
 

@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace MTProto.TL
 {
-    public class TLInt : TLObject
+    public class TLUint : TLObject
     {
-        private int _value;
-        public int Value
+        private uint _value;
+        public uint Value
         {
             get { return _value; }
             set
@@ -16,19 +20,19 @@ namespace MTProto.TL
             }
         }
 
-        public TLInt() { }
+        public TLUint() { }
 
-        public TLInt(int value)
+        public TLUint(uint value)
         {
             _value = value;
         }
 
-        public TLInt(byte[] buffer, ref int position)
+        public TLUint(byte[] buffer, ref int position)
         {
             FromBytes(buffer, ref position);
         }
 
-        public TLInt(Stream input, ref int position)
+        public TLUint(Stream input, ref int position)
         {
             FromStream(input, ref position);
         }
@@ -62,7 +66,7 @@ namespace MTProto.TL
 
         private void parse(byte[] buffer, ref int position)
         {
-            Value = BitConverter.ToInt32(buffer, 0);
+            Value = BitConverter.ToUInt32(buffer, 0);
             position += 4;
         }
     }
